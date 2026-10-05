@@ -1,50 +1,132 @@
 # VERA - Asistente Inteligente de Ciberseguridad
 
-## Firebase local
+Aplicación web que ayuda a identificar señales de phishing, estafas y enlaces sospechosos. VERA combina análisis heurístico con proveedores de inteligencia artificial configurables y ofrece recomendaciones en español.
 
-1. Crea un proyecto en Firebase Console.
-2. En Authentication, habilita el proveedor Email/Password.
-3. Crea la base de Firestore en producción.
-4. Registra una aplicación Web y copia sus valores en `.env` (`VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_APP_ID`). Estos valores del cliente son públicos; la seguridad la aplican Auth y las reglas.
-5. Para que el backend local acceda a Firestore, configura `FIREBASE_PROJECT_ID` y credenciales ADC de Google Cloud (`gcloud auth application-default login`) o `FIREBASE_SERVICE_ACCOUNT_JSON` en tu `.env`. Nunca guardes un archivo de service account en Git.
-6. Despliega reglas e índices con `npx firebase-tools deploy --only firestore:rules,firestore:indexes`.
-7. En dos terminales ejecuta `npm run dev:api` y `npm run dev`.
+[![Node.js](https://img.shields.io/badge/Node.js-24-339933)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-8-646CFF)](https://vite.dev/)
+[![Firebase](https://img.shields.io/badge/Firebase-Auth%20%7C%20Firestore-FFCA28)](https://firebase.google.com/)
+[![License](https://img.shields.io/badge/license-Privado-lightgrey)]()
 
-Sin configuración Firebase, el modo local permite probar la UI y guarda reportes localmente. No uses ese modo para producción.
+## ¿De qué trata este proyecto?
 
-## Configuración de IA
+VERA es una herramienta web de apoyo para revisar mensajes, enlaces e imágenes que podrían formar parte de una estafa digital. El usuario comparte el contenido recibido y la aplicación presenta una clasificación —probablemente seguro, sospechoso o peligroso— junto con una explicación y recomendaciones prácticas.
 
-El backend admite proveedores opcionales. `AI_API_KEY` configura ChatGPT mediante una API compatible con OpenAI; `GEMINI_API_KEY` configura Gemini. `GOOGLE_SAFE_BROWSING_KEY` y `VIRUSTOTAL_API_KEY` activan reputación externa. Guarda esas claves solo como secretos en el entorno del servidor.
+El sistema está orientado a la prevención y educación en ciberseguridad. Sus resultados son indicativos: no garantizan que un mensaje, sitio web o archivo sea seguro.
 
-## Despliegue
+La solución está dividida en dos partes:
 
-Requisitos: proyecto Firebase, facturación de Google Cloud habilitada para Cloud Run, Firebase CLI y Google Cloud CLI instalados y autenticados.
+- **Frontend:** React y Vite, con una interfaz para analizar contenido, consultar el historial y aprender recomendaciones básicas de seguridad.
+- **Backend:** API HTTP en Node.js que valida y analiza las solicitudes, aplica reglas de seguridad y puede conectarse a proveedores externos.
 
-1. Selecciona el proyecto: `npx firebase-tools login` y `npx firebase-tools use --add`.
-2. Construye la web con `.env` configurado con los valores `VITE_FIREBASE_*`.
-3. Despliega la API a Cloud Run desde la raíz:
+## ¿A qué ayuda?
 
-   `gcloud run deploy vera-api --source . --region us-central1 --allow-unauthenticated --set-env-vars FIREBASE_PROJECT_ID=TU_PROJECT_ID,ALLOWED_ORIGIN=https://TU_PROJECT_ID.web.app,NODE_ENV=production`
+1. **Revisar mensajes sospechosos:** identifica expresiones de urgencia, solicitudes de dinero y señales comunes de fraude.
+2. **Evaluar enlaces:** detecta dominios reconocidos, acortadores, protocolos inseguros y posibles intentos de suplantación.
+3. **Consultar fuentes externas:** puede verificar reputación mediante Google Safe Browsing y VirusTotal cuando se configuran sus claves.
+4. **Obtener análisis con IA:** permite conectar modelos compatibles con OpenAI y Gemini desde el servidor.
+5. **Entender el resultado:** explica las señales encontradas y sugiere qué hacer a continuación.
+6. **Revisar imágenes y códigos QR:** permite adjuntar imágenes y detectar códigos QR en el navegador; un análisis visual con IA requiere configurar un proveedor compatible.
+7. **Consultar análisis anteriores y reportar resultados dudosos:** con Firebase configurado, el historial y los reportes pueden asociarse a la cuenta del usuario.
 
-4. Otorga al service account usado por Cloud Run el rol `Cloud Datastore User` y configura los secretos de IA con Secret Manager; no uses `--set-env-vars` para claves privadas.
-5. Despliega web y seguridad de Firestore: `npm run deploy:hosting`.
-6. En Firebase Console > Hosting > Add custom domain, registra tu dominio. Añade en tu proveedor DNS los registros TXT/A que Firebase indique y espera la verificación del certificado TLS.
-7. Actualiza `ALLOWED_ORIGIN` del servicio si el dominio personalizado cambia y vuelve a desplegar Cloud Run.
+## Objetivos del sistema
 
-Firebase Hosting sirve `dist` y reenvía `/api/**` al servicio `vera-api` en `us-central1`. El API exige un token Firebase Auth en producción. Las reglas Firestore bloquean acceso directo desde el navegador; el servidor usa Firebase Admin y guarda historial y reportes por UID.
+- Ayudar a reconocer señales habituales de phishing, suplantación y fraude digital.
+- Proporcionar recomendaciones claras y comprensibles para personas no especialistas.
+- Revisar dominios y enlaces antes de que el usuario interactúe con ellos.
+- Reducir la exposición de información personal mediante redacción de algunos datos sensibles.
+- Permitir autenticación e historial por usuario mediante Firebase.
+- Mantener las claves privadas de IA y reputación en el backend, no en el navegador.
 
-## Seguridad y alcance
+## Stack tecnológico
 
-- No subas `.env`, credenciales de service account, claves API ni imágenes de usuarios al repositorio.
-- La configuración `VITE_FIREBASE_*` se compila en el navegador y no debe contener secretos privados.
-- Firestore almacena extractos redactados del análisis para el historial. Define retención y consentimiento antes del lanzamiento público.
-- Los reportes no deben almacenar imágenes por defecto.
-- Las cuotas de Firestore, Cloud Run y modelos externos pueden generar costos. Configura presupuestos, límites y alertas en Google Cloud.
-- El dominio personalizado requiere que controles el dominio y puedas editar su DNS; no se puede completar desde el código.
+### Frontend
 
-## Comandos locales
+- React 19
+- Vite 8
+- Firebase Authentication
+- `jsqr` para detectar códigos QR en imágenes en el navegador
+- CSS propio y diseño adaptable
 
-- `npm run lint`
-- `npm run build`
-- API: `npm run dev:api`
-- UI: `npm run dev`
+### Backend
+
+- Node.js 24 en la imagen Docker
+- API HTTP basada en los módulos nativos de Node.js
+- Firebase Admin SDK
+- Firestore para análisis e informes cuando está configurado
+- Integración opcional con APIs compatibles con OpenAI y Gemini
+- Integración opcional con Google Safe Browsing y VirusTotal
+
+### Infraestructura
+
+- Firebase Hosting para servir la aplicación web
+- Cloud Run para desplegar la API
+- Firestore para almacenar historial e informes
+- Docker para empaquetar el backend
+
+## Funcionalidades principales
+
+### 1. Análisis de mensajes y enlaces
+
+- Analiza texto de hasta 4.000 caracteres.
+- Busca señales como urgencia, solicitudes de credenciales o dinero y enlaces sospechosos.
+- Identifica dominios de servicios conocidos y dominios que podrían intentar imitarlos.
+- Distingue entre resultados probablemente seguros, sospechosos y peligrosos.
+- Presenta una explicación y recomendaciones para cada resultado.
+
+### 2. Análisis con proveedores de IA
+
+- Permite configurar un proveedor compatible con OpenAI o Gemini.
+- Puede consultar ambos proveedores y mostrar si sus clasificaciones coinciden.
+- Mantiene un análisis heurístico como alternativa cuando no hay un proveedor configurado o este no está disponible.
+- Puede enviar imágenes a modelos compatibles con visión, si se configuran las credenciales y el modelo correspondiente.
+
+### 3. Revisión de imágenes y códigos QR
+
+- Acepta imágenes PNG, JPG y WEBP de hasta 5 MB desde la interfaz.
+- Detecta códigos QR en el navegador y agrega su contenido al análisis.
+- Envía la imagen al backend para revisión; el análisis visual depende de tener configurado un proveedor de IA compatible.
+- Sin un modelo de visión configurado, VERA indica que la imagen requiere revisión y no afirma haberla interpretado.
+
+### 4. Reputación y redirecciones
+
+- Puede consultar Google Safe Browsing y VirusTotal si se configuran sus claves.
+- Puede revisar redirecciones HTTP cuando se habilita `CHECK_REDIRECTS`.
+- Aplica validaciones para evitar consultar direcciones locales o privadas.
+- Estas comprobaciones externas son opcionales y pueden estar sujetas a cuotas y costos.
+
+### 5. Cuenta e historial
+
+- Incluye registro e inicio de sesión con correo y contraseña mediante Firebase Authentication.
+- Guarda análisis asociados al usuario en Firestore cuando Firebase está configurado.
+- Muestra consultas recientes en la sección de historial.
+- En modo local sin Firebase, el historial no tiene persistencia equivalente a la de producción.
+
+### 6. Reportes y guía de seguridad
+
+- Permite reportar un diagnóstico dudoso.
+- Guarda los reportes en Firestore si Firebase Admin está disponible; de lo contrario, puede almacenarlos localmente en formato NDJSON.
+- Incluye una guía con recomendaciones para reconocer urgencias falsas, proteger credenciales y verificar solicitudes por otro canal.
+
+### 7. Seguridad y privacidad
+
+- Las claves privadas de IA y reputación se configuran en el backend.
+- El servidor elimina o reemplaza ciertos números y correos antes de enviar el texto al análisis y guardar extractos.
+- La API limita el número de solicitudes por dirección IP.
+- En producción, el backend exige un token válido de Firebase Authentication.
+- Las reglas de Firestore bloquean el acceso directo desde el navegador; las operaciones se realizan desde el servidor.
+
+## Requisitos previos
+
+- Node.js y npm
+- Firebase CLI para desplegar Hosting y reglas
+- Google Cloud CLI para desplegar la API en Cloud Run
+- Proyecto de Firebase configurado para Authentication y Firestore
+- Facturación de Google Cloud habilitada para desplegar en Cloud Run
+
+## Configuración local
+
+1. Instala las dependencias:
+
+   ```bash
+   npm install
