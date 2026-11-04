@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VERA - Scientific Conference Poster | ExpoProyecto 2026</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #030712;
+      --card-bg: rgba(15, 23, 42, 0.85);
+      --card-border: rgba(56, 189, 248, 0.2);
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.35);
+      --purple: #a855f7;
+      --green: #22c55e;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      background: radial-gradient(circle at 50% 0%, #0f172a 0%, #030712 100%);
+      color: var(--text);
+      line-height: 1.45;
+      padding: 30px;
+      min-height: 100vh;
+    }
+
+    /* Poster Frame (Optimized for standard A0/Display ratio) */
+    .poster-container {
+      max-width: 1540px;
+      margin: 0 auto;
+      background: rgba(10, 15, 30, 0.7);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 28px;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85), 0 0 100px rgba(56, 189, 248, 0.08);
+      padding: 40px;
+      backdrop-filter: blur(20px);
+    }
+
+    /* Print Controls */
+    .toolbar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .btn {
+      background: #0ea5e9;
+      color: white;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+    }
+    .btn:hover { background: #38bdf8; transform: translateY(-2px); }
+    .btn-secondary {
+      background: rgba(30, 41, 59, 0.8);
+      color: var(--muted);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .btn-secondary:hover { color: white; background: #334155; }
+
+    /* Header */
+    .header {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 32px;
+      padding-bottom: 30px;
+      border-bottom: 2px solid rgba(56, 189, 248, 0.25);
+      position: relative;
+    }
+    .header-logo {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 20px var(--accent-glow));
+    }
+    .header-titles h1 {
+      font-size: 38px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      background: linear-gradient(135deg, #ffffff 0%, #38bdf8 60%, #a855f7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header-titles h2 {
+      font-size: 19px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-top: 6px;
+    }
+    .header-meta {
+      text-align: right;
+      font-size: 13px;
+      color: var(--muted);
+      border-left: 2px solid rgba(56, 189, 248, 0.2);
+      padding-left: 24px;
+    }
+    .author-name {
+      font-size: 17px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .institution-tag {
+      color: #38bdf8;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    .track-tag {
+      display: inline-block;
+      margin-top: 8px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #7dd3fc;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* 3-Column Poster Layout */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1.35fr 1fr;
+      gap: 24px;
+      margin-top: 32px;
+    }
+
+    .col {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Card Panels */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #38bdf8, transparent);
+    }
+    .card-purple::before {
+      background: linear-gradient(90deg, var(--purple), transparent);
+    }
+    .card-green::before {
+      background: linear-gradient(90deg, var(--green), transparent);
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .card-title .icon {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      font-size: 14px;
+    }
+
+    p, li {
+      font-size: 13.5px;
+      color: #cbd5e1;
+      line-height: 1.55;
+    }
+    ul { list-style: none; }
+    ul li {
+      position: relative;
+      padding-left: 20px;
+      margin-bottom: 10px;
+    }
+    ul li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    /* Stats Grid */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .stat-box {
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+    }
+    .stat-val {
+      font-size: 26px;
+      font-weight: 900;
+      color: var(--accent);
+    }
+    .stat-lbl {
+      font-size: 10.5px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 4px;
+    }
+
+    /* Tech Badges */
+    .badges-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .badge {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #e2e8f0;
+      padding: 5px 11px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge b { color: var(--accent); }
+
+    /* Step-by-Step Flow */
+    .step-item {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 18px;
+      position: relative;
+    }
+    .step-num {
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0ea5e9, #6366f1);
+      color: white;
+      font-weight: 800;
+      font-size: 15px;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+    }
+    .step-content h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 4px;
+    }
+    .step-content p {
+      font-size: 12.5px;
+      color: #94a3b8;
+    }
+    .code-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #38bdf8;
+    }
+
+    /* Verdict Boxes */
+    .verdicts-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .verdict-card {
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .verdict-green {
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      color: #4ade80;
+    }
+    .verdict-amber {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+    }
+    .verdict-red {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #f87171;
+    }
+
+    /* Comparison Table */
+    .table-custom {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 11.5px;
+    }
+    .table-custom th {
+      text-align: left;
+      padding: 9px 10px;
+      background: rgba(30, 41, 59, 0.7);
+      color: var(--accent);
+      border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+      font-weight: 700;
+    }
+    .table-custom td {
+      padding: 9px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #cbd5e1;
+    }
+
+    /* Bottom Banner */
+    .bottom-banner {
+      margin-top: 24px;
+      border-top: 1px solid rgba(56, 189, 248, 0.25);
+      padding-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .qr-box {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(15, 23, 42, 0.8);
+      padding: 10px 18px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Print Optimization */
+    @media print {
+      body { background: #030712; padding: 0; }
+      .toolbar { display: none; }
+      .poster-container { border: none; box-shadow: none; max-width: 100%; padding: 20px; }
+      .grid { gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Controls -->
+  <div class="toolbar">
+    <button class="btn btn-secondary" onclick="window.location.href='/'">← Back to VERA App</button>
+    <button class="btn" onclick="window.print()">🖨️ Print / Save as PDF Poster</button>
+  </div>
+
+  <div class="poster-container">
+    
+    <!-- Header -->
+    <header class="header">
+      <img src="favicon.png" alt="VERA Logo" class="header-logo">
+      <div class="header-titles">
+        <h1>VERA: Intelligent Cybersecurity Assistant</h1>
+        <h2>A Hybrid Multi-Tier AI Architecture for Social Engineering & Phishing Defense</h2>
+      </div>
+      <div class="header-meta">
+        <div class="author-name">Cristian Alejandro Molina Cárdenas</div>
+        <div class="institution-tag">Universidad Libre de Colombia</div>
+        <div>Faculty of Engineering — Systems Engineering</div>
+        <span class="track-tag">ExpoProyecto 2026 • AI & Security</span>
+      </div>
+    </header>
+
+    <!-- 3-Column Poster Layout -->
+    <div class="grid">
+
+      <!-- COLUMN 1: Motivation & Foundations -->
+      <div class="col">
+        
+        <!-- Abstract -->
+        <div class="card">
+          <div class="card-title">
+            <span class="icon">01</span> Abstract & Motivation
+          </div>
+          <p>
+            Digital fraud and psychological manipulation—such as <b>Phishing</b>, <b>Smishing</b> (SMS deception), and <b>Quishing</b> (QR code obfuscation)—represent over 80% of personal data breaches. Existing solutions act as opaque enterprise firewalls that fail to empower everyday citizens.
+          </p>
+          <div class="stats-row">
+            <div class="stat-box">
+              <div class="stat-val">>80%</div>
+              <div class="stat-lbl">Breaches via Human Error</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val">300ms</div>
+              <div class="stat-lbl">Avg Response Latency</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val">100%</div>
+              <div class="stat-lbl">Client Privacy Redacted</div>
+            </div>
+          </div>
+          <p>
+            <b>VERA</b> bridges this vulnerability by unifying deterministic client heuristics, real-time threat intelligence (Safe Browsing), and guardrailed Multimodal AI into a reliable, privacy-first risk evaluator.
+          </p>
+        </div>
+
+        <!-- Problem & Objectives -->
+        <div class="card card-purple">
+          <div class="card-title">
+            <span class="icon">02</span> Objectives & Design Pillars
+          </div>
+          <ul>
+            <li><b>Tri-Verdict Risk Classifier:</b> Clear categorization: <i>Probably Safe</i>, <i>Suspicious</i>, or <i>Dangerous</i>.</li>
+            <li><b>Zero-Knowledge Privacy:</b> Scrub credit cards, national IDs, and credentials locally before external processing.</li>
+            <li><b>High-Resilience Fallback:</b> Maintain deterministic heuristics if AI APIs face outages or rate quotas.</li>
+            <li><b>Actionable Plain Language:</b> Replace obscure cryptographic warnings with clear protective protocols.</li>
+          </ul>
+        </div>
+
+        <!-- Privacy Engine Highlight -->
+        <div class="card">
+          <div class="card-title">
+            <span class="icon">03</span> Privacy Sanitization Engine
+          </div>
+          <p>Sensitive data is redacted using deterministic regular expressions prior to server transmission:</p>
+          <div style="margin-top: 10px; display: grid; gap: 8px;">
+            <div class="badge"><b>Card Sanitizer:</b> <span class="code-tag">\b(?:\d[ -]?){13,19}\b</span> → [CARD REDACTED]</div>
+            <div class="badge"><b>ID & Phone:</b> <span class="code-tag">\b\d{7,12}\b</span> → [NUMBER REDACTED]</div>
+            <div class="badge"><b>Email Shield:</b> <span class="code-tag">[\w.+-]+@...</span> → [EMAIL REDACTED]</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- COLUMN 2: Step-by-Step Pipeline (Core of the Project) -->
+      <div class="col">
+
+        <!-- STEP BY STEP PIPELINE -->
+        <div class="card card-green" style="flex: 1;">
+          <div class="card-title">
+            <span class="icon">⚡</span> The 5-Stage Step-by-Step Pipeline
+          </div>
+          <p style="margin-bottom: 20px; font-weight: 500;">
+            The sequential architecture executing on each analyzed message, link, or image:
+          </p>
+
+          <!-- Step 1 -->
+          <div class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <h4>Multi-Modal Ingestion & Edge QR Decoding</h4>
+              <p>User inputs text, SMS, link, or uploads an image. In-browser <span class="code-tag">jsQR</span> decodes embedded QR targets in memory, preventing unauthorized image leaks to remote servers.</p>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <h4>Deterministic Privacy Scrubbing</h4>
+              <p>The <span class="code-tag">redactSensitiveData</span> filter strips credit cards, passwords, and Colombian national IDs. Only contextual semantic tokens are passed downstream.</p>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <h4>Heuristic Domain & Urgency Analysis</h4>
+              <p>Parses canonical hostnames against verified institutional whitelist (<span class="code-tag">whatsapp.com</span>, <span class="code-tag">bancolombia.com</span>, <span class="code-tag">gov.co</span>). Flags typosquatting and psychological pressure keywords (<i>urgente, suspenderán</i>).</p>
+            </div>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="step-item">
+            <div class="step-num">4</div>
+            <div class="step-content">
+              <h4>Threat Intelligence & AI Consensus</h4>
+              <p>Paralleled queries to <b>Google Safe Browsing v4</b> and <b>VirusTotal v3</b> combined with structured <b>Gemini / GPT-4o</b> multimodal prompts enforcing deterministic JSON schemas.</p>
+            </div>
+          </div>
+
+          <!-- Step 5 -->
+          <div class="step-item">
+            <div class="step-num">5</div>
+            <div class="step-content">
+              <h4>Verdict Synthesis & Defensive Action Protocol</h4>
+              <p>The Synthesizer reconciles discrepancies, enforces guardrails against false positives, and renders the user's color verdict and actionable security recommendations.</p>
+            </div>
+          </div>
+
+          <!-- Verdicts Banner -->
+          <div class="verdicts-grid">
+            <div class="verdict-card verdict-green">
+              🟢 SAFE<br><span style="font-size: 10px; font-weight: 500;">Verified domain & clean</span>
+            </div>
+            <div class="verdict-card verdict-amber">
+              🟡 SUSPICIOUS<br><span style="font-size: 10px; font-weight: 500;">Unverified / Unusual link</span>
+            </div>
+            <div class="verdict-card verdict-red">
+              🔴 DANGEROUS<br><span style="font-size: 10px; font-weight: 500;">Impersonation / Urgency</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- COLUMN 3: Architecture, Evaluation & Conclusions -->
+      <div class="col">
+
+        <!-- Architecture & Stack -->
+        <div class="card">
+          <div class="card-title">
+            <span class="icon">04</span> Microservice Architecture
+          </div>
+          <div class="badges-cloud">
+            <span class="badge"><b>Frontend:</b> React 19 + Vite 8</span>
+            <span class="badge"><b>Backend:</b> Node.js 24 API</span>
+            <span class="badge"><b>Computer Vision:</b> jsQR Canvas</span>
+            <span class="badge"><b>Security Intel:</b> Safe Browsing v4</span>
+            <span class="badge"><b>AI Models:</b> Gemini 1.5 & GPT-4o</span>
+            <span class="badge"><b>Auth & Storage:</b> Firebase + Firestore</span>
+            <span class="badge"><b>Containers:</b> Docker + Cloud Run</span>
+          </div>
+        </div>
+
+        <!-- Empirical Validation -->
+        <div class="card card-purple">
+          <div class="card-title">
+            <span class="icon">05</span> Empirical Validation Cases
+          </div>
+          <table class="table-custom">
+            <thead>
+              <tr>
+                <th>Test Vector</th>
+                <th>Detected Signals</th>
+                <th>VERA Verdict</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b>https://web.whatsapp.com/</b></td>
+                <td>Verified HTTPS, Institutional Meta domain</td>
+                <td style="color: #4ade80; font-weight: 700;">🟢 Probably Safe</td>
+              </tr>
+              <tr>
+                <td><b>"Banco: cuenta suspendida confirma en bit.ly/bn-co"</b></td>
+                <td>High urgency, URL shortener, banking impersonation</td>
+                <td style="color: #f87171; font-weight: 700;">🔴 Dangerous</td>
+              </tr>
+              <tr>
+                <td><b>Parking QR Code (Quishing)</b></td>
+                <td>Insecure HTTP, untrusted TLD (.top)</td>
+                <td style="color: #fbbf24; font-weight: 700;">🟡 Suspicious</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Conclusions & Future Scope -->
+        <div class="card">
+          <div class="card-title">
+            <span class="icon">06</span> Conclusions & Roadmap
+          </div>
+          <ul>
+            <li><b>Empowering Citizens:</b> Transforms abstract cybersecurity protocols into immediate, actionable decisions.</li>
+            <li><b>Resilience:</b> Zero-downtime operation guaranteed through local heuristic fallback matrices.</li>
+            <li><b>Next Milestone:</b> Native Chromium Browser Extension and automated WhatsApp verification bot for real-time community protection.</li>
+          </ul>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Bottom Banner / Footer -->
+    <footer class="bottom-banner">
+      <div>
+        <b>Project VERA</b> — Verified Evaluation & Risk Assessment • ExpoProyecto 2026 Academic Exhibition
+      </div>
+      <div class="qr-box">
+        <span style="font-size: 11px; color: #cbd5e1;">GitHub Repository:</span>
+        <code style="color: var(--accent); font-weight: bold;">github.com/CristianMolina25/VERA</code>
+      </div>
+    </footer>
+
+  </div>
+
+</body>
+</html>
+

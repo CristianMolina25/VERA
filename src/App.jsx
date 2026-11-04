@@ -110,6 +110,7 @@ function App() {
           <button className={`nav-item ${page === 'analizar'  ? 'active' : ''}`} onClick={() => navigateTo('analizar')}><span>⌁</span> Analizar</button>
           <button className={`nav-item ${page === 'historial' ? 'active' : ''}`} onClick={() => navigateTo('historial')}><span>◷</span> Historial <b>{history.length || ''}</b></button>
           <button className={`nav-item ${page === 'guia'      ? 'active' : ''}`} onClick={() => navigateTo('guia')}><span>✦</span> Guía de seguridad</button>
+          <a href="/poster.html" target="_blank" rel="noreferrer" className="nav-item" style={{ textDecoration: 'none', color: '#38bdf8' }}><span>📑</span> Poster Expo (EN)</a>
         </nav>
         <div className="sidebar-bottom">
           <div className="privacy-note">
