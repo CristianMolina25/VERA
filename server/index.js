@@ -10,7 +10,7 @@ const WINDOW_MS = 60_000
 const MAX_REQUESTS = 30
 
 function headers() {
-  return { 'Access-Control-Allow-Origin': allowedOrigin, 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Allow-Methods': 'POST, GET, OPTIONS', 'Content-Type': 'application/json; charset=utf-8' }
+  return { 'Access-Control-Allow-Origin': allowedOrigin, 'Access-Control-Allow-Headers': 'Content-Type, Authorization', 'Access-Control-Allow-Methods': 'POST, GET, OPTIONS', 'Content-Type': 'application/json; charset=utf-8' }
 }
 function send(response, status, body) { response.writeHead(status, headers()); response.end(JSON.stringify(body)) }
 function clientKey(request) { return request.headers['x-forwarded-for']?.split(',')[0] || request.socket.remoteAddress || 'unknown' }
