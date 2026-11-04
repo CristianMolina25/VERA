@@ -16,7 +16,7 @@ export function firebaseServices() { return services }
 
 export async function authenticate(request) {
   const configured = Boolean(services)
-  const required = process.env.NODE_ENV === 'production' || process.env.REQUIRE_AUTH === 'true'
+  const required = process.env.REQUIRE_AUTH === 'true'
   const header = request.headers.authorization || ''
   const token = header.startsWith('Bearer ') ? header.slice(7) : ''
   if (!configured) {

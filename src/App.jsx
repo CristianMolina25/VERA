@@ -32,11 +32,13 @@ function App() {
     })
   }, [])
 
+  const API_BASE = import.meta.env.VITE_API_URL || ''
   const apiFetch = async (url, options = {}) => {
+    const fullUrl = url.startsWith('http') ? url : API_BASE + url
     const token = await firebaseAuth?.currentUser?.getIdToken()
     const headers = { ...(options.headers || {}) }
     if (token) headers.Authorization = `Bearer ${token}`
-    return fetch(url, { ...options, headers })
+    return fetch(fullUrl, { ...options, headers })
   }
 
   useEffect(() => {

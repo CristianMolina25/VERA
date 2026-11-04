@@ -4,7 +4,7 @@ import { saveReport } from './reports.js'
 import { authenticate, firebaseServices, readAnalyses, storeAnalysis } from './firebase.js'
 
 const port = Number(process.env.PORT || 8787)
-const allowedOrigin = process.env.ALLOWED_ORIGIN || 'http://localhost:5173'
+const allowedOrigin = process.env.ALLOWED_ORIGIN || '*'
 const attempts = new Map()
 const WINDOW_MS = 60_000
 const MAX_REQUESTS = 30
