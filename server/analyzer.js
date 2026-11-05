@@ -67,7 +67,7 @@ export function heuristicAnalysis(text) {
 function imageFallback() { return { level: 'warning', label: 'Sospechoso', title: 'Necesitamos revisar la imagen', summary: 'La captura se recibió, pero no hay un motor de visión configurado.', detail: 'VERA no debe adivinar el contenido de una imagen. Activa un modelo compatible con visión para leer texto, códigos QR y señales visuales.', action: 'No abras enlaces ni compartas datos hasta que la imagen pueda ser revisada.', signals: ['imagen pendiente de OCR'] } }
 
 export async function analyzeWithAI(text, env, image) {
-  const fallback = image ? imageFallback() : heuristicAnalysis(text)
+  const fallback = (image && !extractUrls(text).length) ? imageFallback() : heuristicAnalysis(text)
   const links = urlContext(text)
   try {
     const redirects = await inspectRedirects(links.urls.map((url) => url.value), env)
