@@ -18,12 +18,7 @@ function App() {
   const [authReady, setAuthReady] = useState(!firebaseConfigured)
   const [content, setContent] = useState('')
   const [result, setResult] = useState(null)
-  const [history, setHistory] = useState(() => {
-    try {
-      const s = localStorage.getItem('vera_local_history')
-      return s ? JSON.parse(s) : []
-    } catch { return [] }
-  })
+  const [history, setHistory] = useState([])
   const [page, setPage] = useState('landing')
   const [support, setSupport] = useState(false)
   const [showTerms, setShowTerms] = useState(false)
@@ -44,12 +39,28 @@ function App() {
   }, [])
 
   useEffect(() => {
+    try { localStorage.removeItem('vera_local_history') } catch {}
     if (!firebaseAuth) return
     return onAuthStateChanged(firebaseAuth, (user) => {
       setIsAuthenticated(Boolean(user))
       setCurrentUser(user)
       setAuthReady(true)
-      if (user) setPage((current) => current === 'landing' || current === 'login' || current === 'register' ? 'analizar' : current)
+      if (user) {
+        setPage((current) => current === 'landing' || current === 'login' || current === 'register' ? 'analizar' : current)
+        const userKey = `vera_history_${user.uid}`
+        try {
+          const saved = localStorage.getItem(userKey)
+          setHistory(saved ? JSON.parse(saved) : [])
+        } catch {
+          setHistory([])
+        }
+      } else {
+        setHistory([])
+        setResult(null)
+        setContent('')
+        setImage(null)
+        setOcrStatus('')
+      }
     })
   }, [])
 
@@ -64,21 +75,27 @@ function App() {
 
   useEffect(() => {
     if (page !== 'historial') return
+    const userKey = currentUser?.uid ? `vera_history_${currentUser.uid}` : 'vera_history_guest'
+    
+    // 1. Immediately read local storage for the current user
+    try {
+      const saved = localStorage.getItem(userKey)
+      setHistory(saved ? JSON.parse(saved) : [])
+    } catch {
+      setHistory([])
+    }
+
+    // 2. Fetch server history if authenticated
     if (isAuthenticated && firebaseConfigured) {
       apiFetch('/api/history').then((r) => r.ok ? r.json() : null).then((data) => {
-        if (data?.items?.length) {
+        if (data?.items && Array.isArray(data.items) && data.items.length > 0) {
           const formatted = data.items.map((i) => ({ ...i, time: i.createdAt ? new Date(i.createdAt).toLocaleString() : 'Reciente' }))
           setHistory(formatted)
-          try { localStorage.setItem('vera_local_history', JSON.stringify(formatted.slice(0, 20))) } catch {}
+          try { localStorage.setItem(userKey, JSON.stringify(formatted.slice(0, 30))) } catch {}
         }
       }).catch(() => {})
-    } else {
-      try {
-        const s = localStorage.getItem('vera_local_history')
-        if (s) setHistory(JSON.parse(s))
-      } catch {}
     }
-  }, [page, isAuthenticated])
+  }, [page, isAuthenticated, currentUser])
 
   const navigateTo = (newPage) => {
     if (!document.startViewTransition) { setPage(newPage); return }
@@ -161,14 +178,37 @@ function App() {
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'No pudimos analizar el contenido.')
       setResult(data)
+      const userKey = currentUser?.uid ? `vera_history_${currentUser.uid}` : 'vera_history_guest'
       setHistory((items) => {
-        const updated = [{ ...data, excerpt: content.trim(), time: new Date().toLocaleString() }, ...items].slice(0, 20)
-        try { localStorage.setItem('vera_local_history', JSON.stringify(updated)) } catch {}
+        const updated = [{ ...data, excerpt: content.trim(), time: new Date().toLocaleString() }, ...items].slice(0, 30)
+        try { localStorage.setItem(userKey, JSON.stringify(updated)) } catch {}
         return updated
       })
     } catch (requestError) {
       setError(requestError.message || 'No pudimos conectar con VERA.')
     } finally { setLoading(false) }
+  }
+
+  const handleClearHistory = () => {
+    const userKey = currentUser?.uid ? `vera_history_${currentUser.uid}` : 'vera_history_guest'
+    try { localStorage.removeItem(userKey) } catch {}
+    setHistory([])
+  }
+
+  const handleSignOut = async () => {
+    try {
+      if (firebaseAuth) await signOut(firebaseAuth)
+    } catch (e) {
+      console.warn('Sign out error:', e)
+    }
+    setIsAuthenticated(false)
+    setCurrentUser(null)
+    setHistory([])
+    setResult(null)
+    setContent('')
+    setImage(null)
+    setOcrStatus('')
+    navigateTo('landing')
   }
 
   const report = async () => {
@@ -226,7 +266,7 @@ function App() {
               <strong>{currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Mi Cuenta'}</strong>
               <small>{currentUser?.email ? 'Sesión activa' : 'Usuario protegido'}</small>
             </div>
-            <span className="more" onClick={async () => { if (firebaseAuth) await signOut(firebaseAuth); setIsAuthenticated(false); setCurrentUser(null); navigateTo('landing') }} title="Cerrar sesión">✕</span>
+            <span className="more" onClick={handleSignOut} title="Cerrar sesión">✕</span>
           </div>
         </div>
       </aside>
@@ -237,7 +277,7 @@ function App() {
           <div className="status"><i /> Servicio activo <span className="bell">🔔</span></div>
         </header>
         {page === 'analizar' && <Analyze content={content} setContent={setContent} result={result} analyze={analyze} fillExample={fillExample} onImage={selectImage} onReport={report} loading={loading} error={error} image={image} ocrStatus={ocrStatus} />}
-        {page === 'historial' && <History history={history} open={(item) => { setContent(item.excerpt); setResult(item); navigateTo('analizar') }} />}
+        {page === 'historial' && <History history={history} userEmail={currentUser?.email} open={(item) => { setContent(item.excerpt); setResult(item); navigateTo('analizar') }} onClear={handleClearHistory} />}
         {page === 'guia' && <Guide />}
       </main>
 
@@ -407,15 +447,43 @@ function Result({ result, onReport }) {
   )
 }
 
-function History({ history, open }) {
+function History({ history, userEmail, open, onClear }) {
   return (
     <section className="subpage fade-in">
       <div className="subpage-heading">
-        <div><p className="eyebrow">TUS CONSULTAS</p><h1>Historial de análisis</h1><p>Revisa tus consultas recientes y vuelve a ver las recomendaciones de VERA.</p></div>
-        <div className="history-count">{history.length}<small>análisis guardados</small></div>
+        <div>
+          <p className="eyebrow">HISTORIAL PRIVADO {userEmail ? `• ${userEmail}` : ''}</p>
+          <h1>Tus análisis recientes</h1>
+          <p>Consultas y diagnósticos asociados de forma exclusiva y segura a tu cuenta.</p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <div className="history-count">{history.length}<small>análisis guardados</small></div>
+          {history.length > 0 && (
+            <button
+              onClick={() => {
+                if (window.confirm('¿Seguro que deseas vaciar tu historial de análisis de esta cuenta?')) {
+                  onClear?.()
+                }
+              }}
+              style={{
+                background: 'rgba(239, 68, 68, 0.12)',
+                color: '#f87171',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                padding: '0.5rem 0.85rem',
+                borderRadius: '8px',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+              title="Borrar todos los análisis de esta cuenta"
+            >
+              🗑️ Limpiar historial
+            </button>
+          )}
+        </div>
       </div>
       {history.length === 0
-        ? <div className="empty-state"><span>◷</span><h2>Aún no tienes análisis</h2><p>Cuando revises un mensaje o enlace, aparecerá aquí guardado en tu historial.</p></div>
+        ? <div className="empty-state"><span>◷</span><h2>No tienes análisis en esta cuenta</h2><p>Cuando revises un mensaje, enlace o captura, aparecerá guardado únicamente en tu historial personal.</p></div>
         : <div className="history-list">{history.map((item, i) => (
             <button key={`${item.time}-${i}`} onClick={() => open(item)} className="history-item">
               <span className={`mini-status ${item.level}`}>{item.level === 'safe' ? '✓' : '!'}</span>

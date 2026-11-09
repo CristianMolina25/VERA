@@ -36,20 +36,35 @@ export async function authenticate(request) {
 }
 
 export async function storeAnalysis(uid, payload) {
-  if (!services) return null
-  const document = { ...payload, uid, createdAt: FieldValue.serverTimestamp() }
-  const ref = await services.db.collection('analyses').add(document)
-  return ref.id
+  if (!services?.db) return null
+  try {
+    const document = { ...payload, uid, createdAt: FieldValue.serverTimestamp() }
+    const ref = await services.db.collection('analyses').add(document)
+    return ref.id
+  } catch (err) {
+    console.warn('No se pudo guardar análisis en Firestore:', err.message)
+    return null
+  }
 }
 
 export async function readAnalyses(uid, limit = 20) {
-  if (!services) return []
-  const snapshot = await services.db.collection('analyses').where('uid', '==', uid).orderBy('createdAt', 'desc').limit(limit).get()
-  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data(), createdAt: doc.data().createdAt?.toDate?.().toISOString() || null }))
+  if (!services?.db) return []
+  try {
+    const snapshot = await services.db.collection('analyses').where('uid', '==', uid).orderBy('createdAt', 'desc').limit(limit).get()
+    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data(), createdAt: doc.data().createdAt?.toDate?.().toISOString() || null }))
+  } catch (err) {
+    console.warn('No se pudo leer análisis de Firestore:', err.message)
+    return []
+  }
 }
 
 export async function storeReport(uid, payload) {
-  if (!services) return null
-  const ref = await services.db.collection('reports').add({ ...payload, uid, status: 'pending', createdAt: FieldValue.serverTimestamp() })
-  return ref.id
+  if (!services?.db) return null
+  try {
+    const ref = await services.db.collection('reports').add({ ...payload, uid, status: 'pending', createdAt: FieldValue.serverTimestamp() })
+    return ref.id
+  } catch (err) {
+    console.warn('No se pudo guardar reporte en Firestore:', err.message)
+    return null
+  }
 }
