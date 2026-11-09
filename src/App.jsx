@@ -274,12 +274,41 @@ function App() {
       <main className="main-content">
         <header className="topbar">
           <div className="breadcrumb">VERA <span>/</span> {page === 'analizar' ? 'Nuevo análisis' : page === 'historial' ? 'Historial' : 'Aprende a protegerte'}</div>
-          <div className="status"><i /> Servicio activo <span className="bell">🔔</span></div>
+          <div className="status">
+            <i /> Servicio activo <span className="bell">🔔</span>
+            {/* Avatar compacto en móvil */}
+            <div className="mobile-user-pill" onClick={handleSignOut} title="Cerrar sesión">
+              {currentUser?.photoURL
+                ? <img src={currentUser.photoURL} alt="Avatar" className="user-avatar-img" />
+                : <div className="avatar">{currentUser?.displayName?.[0] || currentUser?.email?.[0]?.toUpperCase() || 'U'}</div>
+              }
+              <span className="mp-name">{currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Cuenta'}</span>
+            </div>
+          </div>
         </header>
         {page === 'analizar' && <Analyze content={content} setContent={setContent} result={result} analyze={analyze} fillExample={fillExample} onImage={selectImage} onReport={report} loading={loading} error={error} image={image} ocrStatus={ocrStatus} />}
         {page === 'historial' && <History history={history} userEmail={currentUser?.email} open={(item) => { setContent(item.excerpt); setResult(item); navigateTo('analizar') }} onClear={handleClearHistory} />}
         {page === 'guia' && <Guide />}
       </main>
+
+      {/* ── Barra de navegación inferior (solo móvil ≤640px) ── */}
+      <nav className="bottom-nav" aria-label="Navegación principal">
+        <button className={`bottom-nav-item ${page === 'analizar' ? 'active' : ''}`} onClick={() => navigateTo('analizar')}>
+          <span className="bn-icon">⌁</span>Analizar
+        </button>
+        <button className={`bottom-nav-item ${page === 'historial' ? 'active' : ''}`} onClick={() => navigateTo('historial')}>
+          <span className="bn-icon">◷</span>Historial
+        </button>
+        <button className={`bottom-nav-item ${page === 'guia' ? 'active' : ''}`} onClick={() => navigateTo('guia')}>
+          <span className="bn-icon">✦</span>Guía
+        </button>
+        <button className="bottom-nav-item" onClick={() => setShowWhatsApp(true)}>
+          <span className="bn-icon">💬</span>WhatsApp
+        </button>
+        <button className="bottom-nav-item" onClick={() => setSupport(true)}>
+          <span className="bn-icon">?</span>Ayuda
+        </button>
+      </nav>
 
       {/* Support Modal */}
       {support && (
