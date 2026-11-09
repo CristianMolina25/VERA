@@ -75,3 +75,35 @@
 @keyframes fade-in-up { from { opacity: 0; transform: translateY(-10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @media (max-width: 800px) { .sidebar { width: 72px; padding: 24px 10px 15px; }.brand { padding: 0; justify-content: center; }.brand > span:last-child, .brand-caption, .nav-item:not(.active)::first-letter, .nav-item { font-size: 0; }.nav-item { text-align: center; padding: 13px 4px; }.nav-item span { width: auto; font-size: 20px; }.nav-item.active { font-size: 0; }.nav-item.active span { font-size: 20px; }.privacy-note, .support-link, .user-row strong, .user-row small, .more { display: none; }.user-row { justify-content: center; padding-top: 15px; }.topbar { padding: 0 5%; }.workspace, .subpage { width: 90%; padding-top: 42px; }.shield-art { display: none; }.analysis-grid { grid-template-columns: 1fr; margin-top: 32px; }.tips-panel { display: none; }.trust-strip { align-items: flex-start; }.trust-stats { display: none; }.composer-footer { flex-wrap: wrap; }.input-actions { margin-left: auto; }.analyze-button { margin-left: auto; }.result-body { margin-left: 0; }.result-actions { margin-left: 0; }.guide-grid { grid-template-columns: 1fr; margin-top: 32px; }.subpage-heading { gap: 15px; }.history-count { padding: 10px; }.history-count small { display: none; } }
 @media (max-width: 500px) { .topbar { height: 60px; }.status { display: none; }.intro h1 { font-size: 37px; }.composer-panel { padding: 18px; }.secure-badge { display: none; }.input-actions { width: 100%; margin-left: 0; }.analyze-button { width: 100%; }.result-card { padding: 18px; }.result-pill { font-size: 9px; }.result-body { grid-template-columns: 1fr; gap: 12px; }.result-actions { align-items: flex-start; flex-direction: column; gap: 15px; }.subpage-heading h1 { font-size: 34px; }.history-count { display: none; } }
+
+/* Emergency Guide & Security Protocols */
+.emergency-alert-box { display: flex; align-items: flex-start; gap: 16px; margin: 25px 0 35px; padding: 22px 24px; border-radius: 14px; background: linear-gradient(135deg, #fef2f2 0%, #fff 100%); border: 1.5px solid #fecaca; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.08); }
+.emergency-icon { font-size: 32px; flex-shrink: 0; }
+.emergency-alert-box strong { display: block; color: #991b1b; font-size: 15px; font-weight: 800; margin-bottom: 6px; }
+.emergency-alert-box p { color: #7f1d1d; font-size: 13.5px; line-height: 1.6; margin: 0; }
+.guide-section-title { margin: 38px 0 18px; color: #0f172a; font: 800 20px/1.2 Plus Jakarta Sans, sans-serif; letter-spacing: -0.02em; }
+.guide-detailed-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.guide-card { padding: 24px; background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 18px rgba(15, 23, 42, 0.03); transition: transform 0.2s, box-shadow 0.2s; }
+.guide-card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06); }
+.guide-card.urgent { border-top: 4px solid #ef4444; }
+.guide-card.warning-step { border-top: 4px solid #f59e0b; }
+.guide-card.info-step { border-top: 4px solid #0ea5e9; }
+.guide-badge { display: inline-block; padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 12px; }
+.guide-badge.red { background: #fee2e2; color: #b91c1c; }
+.guide-badge.amber { background: #fef3c7; color: #b45309; }
+.guide-badge.blue { background: #e0f2fe; color: #0369a1; }
+.guide-card h3 { margin: 0 0 14px; color: #0f172a; font: 700 16px Plus Jakarta Sans, sans-serif; }
+.guide-card ul { padding-left: 18px; margin: 0; }
+.guide-card li { margin-bottom: 10px; color: #475569; font-size: 12.5px; line-height: 1.55; }
+.guide-card li b { color: #1e293b; }
+.directory-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 25px; }
+.directory-card { display: flex; align-items: flex-start; gap: 14px; padding: 18px 20px; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+.dir-icon { font-size: 26px; flex-shrink: 0; margin-top: 2px; }
+.directory-card strong { display: block; color: #0f172a; font-size: 14px; font-weight: 700; }
+.directory-card p { margin: 4px 0 8px; color: #64748b; font-size: 12px; line-height: 1.45; }
+.contact-tag { display: inline-block; font-size: 11px; font-weight: 600; color: #0284c7; background: #f0f9ff; padding: 3px 8px; border-radius: 6px; border: 1px solid #bae6fd; }
+.golden-rules-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.rule-card { padding: 22px; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; }
+.rule-number { color: #0ea5e9; font: 800 22px Plus Jakarta Sans, sans-serif; display: block; margin-bottom: 8px; }
+.rule-card h4 { margin: 0 0 8px; color: #0f172a; font: 700 14px Plus Jakarta Sans, sans-serif; }
+.rule-card p { margin: 0; color: #64748b; font-size: 12px; line-height: 1.6; }

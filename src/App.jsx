@@ -16,7 +16,7 @@ function App() {
   const [authReady, setAuthReady] = useState(!firebaseConfigured)
   const [content, setContent] = useState('')
   const [result, setResult] = useState(null)
-  const [history, setHistory] = useState([])
+  const [history, setHistory] = useState(() => { try { const s = localStorage.getItem('vera_local_history'); return s ? JSON.parse(s) : []; } catch { return []; } })
   const [page, setPage] = useState('landing')
   const [support, setSupport] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -42,10 +42,18 @@ function App() {
   }
 
   useEffect(() => {
-    if (page !== 'historial' || !isAuthenticated || !firebaseConfigured) return
-    apiFetch('/api/history').then((response) => response.ok ? response.json() : null).then((data) => {
-      if (data?.items) setHistory(data.items.map((item) => ({ ...item, time: item.createdAt ? new Date(item.createdAt).toLocaleString() : 'Reciente' })))
-    }).catch(() => {})
+    if (page !== 'historial') return;
+    if (isAuthenticated && firebaseConfigured) {
+      apiFetch('/api/history').then((r) => r.ok ? r.json() : null).then((data) => {
+        if (data?.items?.length) {
+          const formatted = data.items.map((i) => ({ ...i, time: i.createdAt ? new Date(i.createdAt).toLocaleString() : 'Reciente' }));
+          setHistory(formatted);
+          try { localStorage.setItem('vera_local_history', JSON.stringify(formatted.slice(0, 20))); } catch {}
+        }
+      }).catch(() => {});
+    } else {
+      try { const s = localStorage.getItem('vera_local_history'); if (s) setHistory(JSON.parse(s)); } catch {}
+    }
   }, [page, isAuthenticated])
 
   const navigateTo = (newPage) => {
@@ -85,7 +93,11 @@ function App() {
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'No pudimos analizar el contenido.')
       setResult(data)
-      setHistory((items) => [{ ...data, excerpt: content.trim(), time: 'Ahora' }, ...items].slice(0, 5))
+      setHistory((items) => {
+        const updated = [{ ...data, excerpt: content.trim(), time: new Date().toLocaleString() }, ...items].slice(0, 20);
+        try { localStorage.setItem('vera_local_history', JSON.stringify(updated)); } catch {}
+        return updated;
+      })
     } catch (requestError) {
       setError(requestError.message || 'No pudimos conectar con VERA.')
     } finally { setLoading(false) }
@@ -260,13 +272,117 @@ function History({ history, open }) {
 function Guide() {
   return (
     <section className="subpage guide-page fade-in">
-      <p className="eyebrow">APRENDE A PROTEGERTE</p>
-      <h1>Pequeñas señales,<br /><em>grandes decisiones.</em></h1>
-      <p className="guide-lead">La mayoría de estafas intenta que actúes rápido. Tómate un momento y revisa.</p>
-      <div className="guide-grid">
-        <article><span className="guide-number">01</span><h2>La urgencia es una alarma</h2><p>Los mensajes que te presionan a actuar "ya" buscan que no puedas pensar. Las entidades reales te dan tiempo.</p></article>
-        <article><span className="guide-number">02</span><h2>Nunca entregues tus claves</h2><p>Ningún banco o entidad te pedirá contraseñas, códigos de verificación o el número completo de tu tarjeta.</p></article>
-        <article><span className="guide-number">03</span><h2>Verifica por otro canal</h2><p>Si un familiar pide dinero o una empresa te contacta, llama al número oficial que ya conoces.</p></article>
+      <div className="subpage-heading">
+        <div>
+          <p className="eyebrow">GUÍA OFICIAL DE CIBERSEGURIDAD Y RESPUESTA RÁPIDA</p>
+          <h1>¿Sospechas de una estafa?<br /><em>Guía de acción inmediata.</em></h1>
+          <p className="guide-lead">
+            Los ciberdelincuentes usan la urgencia y el miedo para que actúes sin pensar. Si recibiste un mensaje dudoso o ya caíste en una trampa, aquí tienes el protocolo paso a paso para proteger tu dinero, tus datos y tus cuentas.
+          </p>
+        </div>
+      </div>
+
+      <div className="emergency-alert-box">
+        <span className="emergency-icon">🚨</span>
+        <div>
+          <strong>¿Acabas de ingresar tus claves o transferir dinero a un desconocido?</strong>
+          <p>
+            1. Comunícate <b>de inmediato</b> con la línea de fraude de tu banco y solicita el bloqueo de productos y canales digitales.<br />
+            2. Cambia tus contraseñas desde otro dispositivo seguro.<br />
+            3. Radica la denuncia formal ante el CAI Virtual de la Policía Nacional.
+          </p>
+        </div>
+      </div>
+
+      <h2 className="guide-section-title">Protocolo de Emergencia Paso a Paso</h2>
+      <div className="guide-detailed-grid">
+        <article className="guide-card urgent">
+          <span className="guide-badge red">Paso 1</span>
+          <h3>Si diste tus claves o datos de tarjetas</h3>
+          <ul>
+            <li><b>Llama a tu banco ahora mismo:</b> Pide bloqueo preventivo de tarjeta débito/crédito y cambio de clave de cajero/virtual.</li>
+            <li><b>Desactiva avances o transferencias:</b> En tu app bancaria oficial, reduce los topes de transferencias a $0 mientras se resuelve.</li>
+            <li><b>Revisa tus movimientos:</b> Solicita al banco desconocer transacciones no autorizadas de inmediato.</li>
+          </ul>
+        </article>
+
+        <article className="guide-card warning-step">
+          <span className="guide-badge amber">Paso 2</span>
+          <h3>Si intentan robarte tu WhatsApp</h3>
+          <ul>
+            <li><b>Nunca compartas códigos SMS de 6 dígitos:</b> Ninguna entidad te pedirá un código enviado por mensaje.</li>
+            <li><b>Si perdiste acceso a tu cuenta:</b> Vuelve a instalar WhatsApp, ingresa tu número y solicita el código por llamada o SMS para expulsar al atacante.</li>
+            <li><b>Activa la verificación en 2 pasos:</b> Abre WhatsApp &gt; Ajustes &gt; Cuenta &gt; Verificación en dos pasos y pon un PIN secreto.</li>
+          </ul>
+        </article>
+
+        <article className="guide-card info-step">
+          <span className="guide-badge blue">Paso 3</span>
+          <h3>Si es un "Familiar en apuros"</h3>
+          <ul>
+            <li><b>Cuelga o detén la conversación:</b> No envíes dinero bajo presión.</li>
+            <li><b>Llama al número de siempre:</b> Comunícate directamente con tu familiar por su número habitual o con personas cercanas a él/ella para confirmar si realmente está en una emergencia.</li>
+            <li><b>Pídele una prueba de voz o pregunta trampa:</b> Pregunta algo íntimo que solo tu familiar sepa (como el nombre de su primera mascota).</li>
+          </ul>
+        </article>
+      </div>
+
+      <h2 className="guide-section-title">Líneas y Canales Oficiales de Denuncia en Colombia</h2>
+      <div className="directory-grid">
+        <div className="directory-card">
+          <span className="dir-icon">👮‍♂️</span>
+          <div>
+            <strong>CAI Virtual - Policía Nacional</strong>
+            <p>Atención 24/7 a delitos informáticos, estafas y suplantación.</p>
+            <span className="contact-tag">Página: caivirtual.policia.gov.co | Twitter: @CAIVirtual</span>
+          </div>
+        </div>
+
+        <div className="directory-card">
+          <span className="dir-icon">⚖️</span>
+          <div>
+            <strong>Fiscalía General de la Nación</strong>
+            <p>Denuncias formales de ciberdelitos a través del sistema A Denunciar.</p>
+            <span className="contact-tag">Línea gratuita: 122 | adenunciar.policia.gov.co</span>
+          </div>
+        </div>
+
+        <div className="directory-card">
+          <span className="dir-icon">🏛️</span>
+          <div>
+            <strong>Superintendencia Financiera de Colombia</strong>
+            <p>Verificación de entidades vigiladas y alertas por captación ilegal.</p>
+            <span className="contact-tag">superfinanciera.gov.co | Línea: (601) 594 0200</span>
+          </div>
+        </div>
+
+        <div className="directory-card">
+          <span className="dir-icon">🏢</span>
+          <div>
+            <strong>Superintendencia de Industria y Comercio (SIC)</strong>
+            <p>Protección del consumidor y quejas por tratamiento indebido de datos personales.</p>
+            <span className="contact-tag">sic.gov.co | Línea Nacional: 01 8000 910165</span>
+          </div>
+        </div>
+      </div>
+
+      <h2 className="guide-section-title">Reglas de Oro de Prevención</h2>
+      <div className="golden-rules-grid">
+        <div className="rule-card">
+          <span className="rule-number">01</span>
+          <h4>El candado no significa seguro</h4>
+          <p>Un sitio web con HTTPS solo significa que la conexión está cifrada, no que el dueño sea legítimo. Los estafadores también crean páginas con candado verde.</p>
+        </div>
+        <div className="rule-card">
+          <span className="rule-number">02</span>
+          <h4>Escribe tú mismo la dirección web</h4>
+          <p>Nunca abras el portal de tu banco desde enlaces que te lleguen por SMS o correo. Abre tu navegador y escribe directamente bancolombia.com o davivienda.com.</p>
+        </div>
+        <div className="rule-card">
+          <span className="rule-number">03</span>
+          <h4>Cuidado con códigos QR en la calle</h4>
+          <p>Los ciberdelincuentes pegan calcomanías con códigos QR falsos sobre los QR reales de parquímetros, restaurantes o pagos. Verifica que la URL destino sea oficial.</p>
+        </div>
       </div>
     </section>
   )

@@ -2,8 +2,16 @@ import { checkReputation, inspectRedirects } from './reputation.js'
 import { askConfiguredProviders } from './providers.js'
 
 const MAX_TEXT_LENGTH = 4000
-const urgentSignals = ['urgente', 'inmediatamente', 'premio', 'ganaste', 'contraseña', 'confirma tus datos', 'antes de 30', 'envía', 'envie', 'transferencia', 'emergencia', 'código de verificación', 'suspendida', 'bloqueada']
-const linkSignals = ['http://', 'https://', '.xyz', '.top', '.click', 'bit.ly', 'tinyurl']
+const urgentSignals = [
+  'urgente', 'inmediatamente', 'premio', 'ganaste', 'contraseña', 'confirma tus datos',
+  'antes de 30', 'envía', 'envie', 'transferencia', 'emergencia', 'código de verificación',
+  'codigo de verificacion', 'suspendida', 'bloqueada', 'inhabilitada', 'embargo',
+  'familiar', 'hijo', 'mama', 'mamá', 'papa', 'papá', 'cambie de numero', 'cambié de número',
+  'nuevo numero', 'nuevo número', 'accidente', 'hospital', 'retenido', 'multa', 'dian',
+  'servientrega', 'clave dinamica', 'clave dinámica', 'token', 'actualiza tus datos',
+  'desbloquear', 'devolución', 'devolucion', 'reembolso', 'lotería', 'loteria'
+]
+const linkSignals = ['http://', 'https://', '.xyz', '.top', '.click', 'bit.ly', 'tinyurl', 't.co', 'cutt.ly', 'linktr.ee', 'wa.me']
 const trustedDomains = [
   { domain: 'sharepoint.com', name: 'Microsoft SharePoint' },
   { domain: 'onedrive.com', name: 'Microsoft OneDrive' },
@@ -64,10 +72,22 @@ export function heuristicAnalysis(text) {
   if (links.trusted.length > 0) return { level: 'safe', label: 'Probablemente seguro', title: 'El dominio parece legítimo', summary: `El enlace pertenece a ${links.trusted[0].organization}, según su dominio.`, detail: 'La dirección usa HTTPS y un dominio oficial reconocido. Esto valida el dominio, pero no garantiza el contenido, archivo o identidad del remitente.', action: 'Puedes abrirlo con precaución. No descargues archivos inesperados ni ingreses claves si el sitio te redirige a otro dominio.', signals: [] }
   return { level: 'safe', label: 'Probablemente seguro', title: 'No vemos señales de estafa', summary: 'El contenido parece normal, pero mantén tus hábitos de seguridad.', detail: 'No encontramos lenguaje de urgencia, solicitudes de dinero ni enlaces con señales evidentes de riesgo.', action: 'Continúa con normalidad y evita compartir códigos o contraseñas.', signals: [] }
 }
-function imageFallback() { return { level: 'warning', label: 'Sospechoso', title: 'Necesitamos revisar la imagen', summary: 'La captura se recibió, pero no hay un motor de visión configurado.', detail: 'VERA no debe adivinar el contenido de una imagen. Activa un modelo compatible con visión para leer texto, códigos QR y señales visuales.', action: 'No abras enlaces ni compartas datos hasta que la imagen pueda ser revisada.', signals: ['imagen pendiente de OCR'] } }
+function imageFallback(hasImage) {
+  return {
+    level: 'warning',
+    label: 'Sospechoso',
+    title: 'Captura recibida bajo revisión preventiva',
+    summary: 'La imagen fue recibida y evaluada con el motor preventivo de VERA.',
+    detail: 'Al no contener texto identificable o no tener un modelo de visión por OCR activo, VERA aplica el principio de máxima precaución. Las capturas de comprobantes de pago o códigos QR no verificados suelen utilizarse para suplantación de identidad.',
+    action: 'No confíes en capturas de pantalla de transferencias bancarias hasta verificar el saldo real en tu aplicación del banco. Si la imagen incluye un código QR, no lo escanees.',
+    signals: ['captura o imagen sin texto explícito']
+  }
+}
 
 export async function analyzeWithAI(text, env, image) {
-  const fallback = (image && !extractUrls(text).length) ? imageFallback() : heuristicAnalysis(text)
+  const urlsInText = extractUrls(text)
+  const isGenericImagePlaceholder = image && (!text || text.startsWith('Imagen adjunta:'))
+  const fallback = (image && !urlsInText.length && isGenericImagePlaceholder) ? imageFallback(true) : heuristicAnalysis(text)
   const links = urlContext(text)
   try {
     const redirects = await inspectRedirects(links.urls.map((url) => url.value), env)
