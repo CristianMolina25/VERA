@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
+import { getAuth, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from 'firebase/auth'
 
 const config = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -11,3 +11,5 @@ const config = {
 export const firebaseConfigured = Object.values(config).every(Boolean)
 export const firebaseApp = firebaseConfigured ? initializeApp(config) : null
 export const firebaseAuth = firebaseApp ? getAuth(firebaseApp) : null
+export const googleProvider = new GoogleAuthProvider()
+export { signInWithPopup, sendPasswordResetEmail }

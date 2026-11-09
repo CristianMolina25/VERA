@@ -1,0 +1,19 @@
+{
+  "name": "VERA - Asistente Inteligente de Ciberseguridad",
+  "short_name": "VERA",
+  "description": "Detección inteligente de phishing, fraudes digitales y enlaces maliciosos",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["security", "utilities", "productivity"]
+}

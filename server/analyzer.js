@@ -9,9 +9,13 @@ const urgentSignals = [
   'familiar', 'hijo', 'mama', 'mamá', 'papa', 'papá', 'cambie de numero', 'cambié de número',
   'nuevo numero', 'nuevo número', 'accidente', 'hospital', 'retenido', 'multa', 'dian',
   'servientrega', 'clave dinamica', 'clave dinámica', 'token', 'actualiza tus datos',
-  'desbloquear', 'devolución', 'devolucion', 'reembolso', 'lotería', 'loteria'
+  'desbloquear', 'devolución', 'devolucion', 'reembolso', 'lotería', 'loteria',
+  'trabaja desde casa', 'gana dinero', 'dar likes', 'tarea completada', 'paquete no entregado',
+  'aduana', 'costo de envio', 'simit', 'fotomulta', 'comparendo', 'embargo de cuenta',
+  'devolucion de iva', 'renta ciudadana', 'ingreso solidario', 'inversion garantizada',
+  'piramide', 'cripto', 'recupera tu inversion', 'hijo detenido', 'fiscalia'
 ]
-const linkSignals = ['http://', 'https://', '.xyz', '.top', '.click', 'bit.ly', 'tinyurl', 't.co', 'cutt.ly', 'linktr.ee', 'wa.me']
+const linkSignals = ['http://', 'https://', '.xyz', '.top', '.click', '.live', '.online', '.site', '.vip', 'bit.ly', 'tinyurl', 't.co', 'cutt.ly', 'linktr.ee', 'wa.me']
 const trustedDomains = [
   { domain: 'sharepoint.com', name: 'Microsoft SharePoint' },
   { domain: 'onedrive.com', name: 'Microsoft OneDrive' },
@@ -33,9 +37,20 @@ const trustedDomains = [
   { domain: 'mercadolibre.com', name: 'Mercado Libre' },
   { domain: 'mercadopago.com', name: 'Mercado Pago' },
   { domain: 'bancolombia.com', name: 'Bancolombia' },
+  { domain: 'davivienda.com', name: 'Banco Davivienda' },
+  { domain: 'bbva.com.co', name: 'BBVA Colombia' },
+  { domain: 'bancodebogota.com', name: 'Banco de Bogotá' },
+  { domain: 'colpatria.com', name: 'Scotiabank Colpatria' },
+  { domain: 'bancopopular.com.co', name: 'Banco Popular' },
+  { domain: 'bancoagrario.gov.co', name: 'Banco Agrario' },
   { domain: 'daviplata.com', name: 'Daviplata' },
   { domain: 'nequi.com.co', name: 'Nequi' },
   { domain: 'gov.co', name: 'Gobierno de Colombia' },
+  { domain: 'policia.gov.co', name: 'Policía Nacional de Colombia' },
+  { domain: 'dian.gov.co', name: 'DIAN' },
+  { domain: 'simit.org.co', name: 'SIMIT' },
+  { domain: 'interrapidisimo.com', name: 'Inter Rapidísimo' },
+  { domain: 'coordinadora.com', name: 'Coordinadora' }
 ]
 
 export function extractUrls(text) {
@@ -65,7 +80,75 @@ export function heuristicAnalysis(text) {
   const signals = urgentSignals.filter((signal) => normalized.includes(signal))
   const links = urlContext(text)
   const hasLink = links.urls.length > 0 || linkSignals.some((signal) => normalized.includes(signal))
-  const hasMoneyRequest = /\$|pesos|transfer|consign|env[ií]a dinero/.test(normalized)
+  const hasMoneyRequest = /\$|pesos|transfer|consign|env[ií]a dinero|plata|necesito plata/.test(normalized)
+
+  // Specific Fraud Category Patterns
+  const isFamilyScam = /(mam[aá]|pap[aá]|hijo|t[ií]o|familiar|hermano|abuelo).*?(emergencia|cambi[eé]|n[uú]mero|nuevo n[uú]mero|accidente|plata|dinero|transfer|consign)/i.test(normalized)
+  const isBankScam = /(bancolombia|davivienda|nequi|daviplata|bbva|banco|colpatria|portal financiero).*?(bloque|suspen|inval|actualiz|clave|token|dinamica|embargo|verific)/i.test(normalized)
+  const isPackageScam = /(servientrega|4-72|inter\s*rapid[ií]simo|coordinadora|envia|paquete|aduana|fedex|dhl).*?(reten|costo|pago|gu[ií]a|reenv[ií]o|flete|entrega)/i.test(normalized)
+  const isJobScam = /(gana|trabajo|empleo|ingreso|tarea|vacante).*?(diario|semanal|casa|inversi[oó]n|likes|telegram|youtube|medio tiempo)/i.test(normalized)
+  const isFineScam = /(simit|fotomulta|comparendo|tr[aá]nsito|polic[ií]a nacional).*?(notifica|pag[oó]|descuento|infracci[oó]n|mandamiento)/i.test(normalized)
+
+  if (isFamilyScam) {
+    return {
+      level: 'danger',
+      label: 'Peligroso',
+      title: 'Modalidad de estafa: "Familiar en apuros"',
+      summary: 'Detectamos el patrón clásico donde un atacante finge ser tu hijo, mamá o familiar diciendo que cambió de número para pedir dinero urgente.',
+      detail: 'Los delincuentes compran chips o usan números desconocidos, inventan un accidente o pérdida de teléfono y apelan al cariño familiar para que transfieras dinero sin pensar.',
+      action: 'NO transfieras ni un peso. Cuelga y llama directamente al número telefónico que siempre has tenido de tu familiar para confirmar su estado.',
+      signals: [...signals, 'suplantación familiar', 'solicitud de dinero urgente']
+    }
+  }
+
+  if (isBankScam) {
+    return {
+      level: 'danger',
+      label: 'Peligroso',
+      title: 'Posible suplantación bancaria (Smishing / Phishing)',
+      summary: 'El mensaje imita una alerta de seguridad de tu banco para asustarte y robar tus claves o token.',
+      detail: 'Las entidades financieras oficiales NUNCA te enviarán enlaces para "desbloquear" cuentas ni te pedirán tu clave dinámica por mensaje o WhatsApp.',
+      action: 'No abras ningún enlace ni entregues códigos. Si tienes dudas, abre directamente la aplicación oficial de tu banco o llama a la línea de atención al cliente.',
+      signals: [...signals, 'alerta bancaria engañosa']
+    }
+  }
+
+  if (isPackageScam) {
+    return {
+      level: 'danger',
+      label: 'Peligroso',
+      title: 'Falso paquete o entrega retenida',
+      summary: 'Suplantación de empresas de mensajería solicitando pagos pequeños para robar los datos de tu tarjeta.',
+      detail: 'Las empresas de logística no te pedirán ingresar a páginas dudosas a pagar "tasas de aduana" ni liberaciones de paquetes que no has pedido.',
+      action: 'No hagas clic en el enlace ni ingreses datos de tarjetas de crédito o débito.',
+      signals: [...signals, 'falsa paquetería retenida']
+    }
+  }
+
+  if (isJobScam) {
+    return {
+      level: 'danger',
+      label: 'Peligroso',
+      title: 'Falsa oferta de empleo / Tareas remuneradas',
+      summary: 'Engaño de ingresos rápidos por dar likes o completar tareas en Telegram/WhatsApp.',
+      detail: 'Inician pagando pequeñas sumas para ganar tu confianza y luego te exigen depositar dinero en supuestas plataformas de inversión que retienen tus fondos.',
+      action: 'Bloquea el remitente y no consignes dinero. Los trabajos legítimos nunca te piden pagar para trabajar.',
+      signals: [...signals, 'falsa oferta laboral / esquema piramidal']
+    }
+  }
+
+  if (isFineScam) {
+    return {
+      level: 'danger',
+      label: 'Peligroso',
+      title: 'Falsa notificación de fotomulta o comparendo',
+      summary: 'Intento de fraude haciéndose pasar por el SIMIT o autoridades de tránsito.',
+      detail: 'Los mensajes que amenazan con embargos inmediatos por multas suelen descargar malware o redirigir a pasarelas de pago falsas.',
+      action: 'Verifica tus infracciones ingresando tú mismo a www.fcm.org.co/simit.',
+      signals: [...signals, 'falsa citación de tránsito']
+    }
+  }
+
   const danger = signals.length >= 2 || links.risky.length > 0 || (hasLink && signals.length > 0) || (hasMoneyRequest && signals.length > 0)
   if (danger) return { level: 'danger', label: 'Peligroso', title: 'No interactúes con este mensaje', summary: 'Encontramos señales claras de una posible estafa digital.', detail: links.risky.length > 0 ? 'El enlace usa un protocolo inseguro o imita el nombre de un servicio legítimo. El candado por sí solo no demuestra que el sitio sea auténtico.' : 'El mensaje combina presión de tiempo, solicitud de datos o dinero y señales de suplantación.', action: 'No abras enlaces, no respondas y repórtalo. Si compartiste información, contacta hoy mismo a tu banco.', signals }
   if (signals.length > 0 || links.unknown.length > 0 || hasMoneyRequest) return { level: 'warning', label: 'Sospechoso', title: 'Revísalo antes de continuar', summary: 'Hay señales que merecen una verificación adicional.', detail: 'El contenido usa un enlace no reconocido o una solicitud poco habitual. Confirma por un canal oficial que la persona o entidad realmente envió este mensaje.', action: 'No ingreses claves ni datos. Busca el sitio oficial escribiendo su dirección directamente.', signals }

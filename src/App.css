@@ -107,3 +107,28 @@
 .rule-number { color: #0ea5e9; font: 800 22px Plus Jakarta Sans, sans-serif; display: block; margin-bottom: 8px; }
 .rule-card h4 { margin: 0 0 8px; color: #0f172a; font: 700 14px Plus Jakarta Sans, sans-serif; }
 .rule-card p { margin: 0; color: #64748b; font-size: 12px; line-height: 1.6; }
+
+/* Modern Auth, PWA & Compliance Styles */
+.google-auth-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 700; color: #1e293b; cursor: pointer; transition: all 0.2s ease; font-family: 'Plus Jakarta Sans', sans-serif; box-shadow: 0 2px 6px rgba(0,0,0,0.03); margin-bottom: 6px; }
+.google-auth-btn:hover { background: #f8fafc; border-color: #38bdf8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(56,189,248,0.15); }
+.auth-divider { display: flex; align-items: center; text-align: center; margin: 16px 0; color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; border-bottom: 1px solid #e2e8f0; }
+.auth-divider span { padding: 0 10px; }
+.forgot-password-link { color: #0ea5e9; font-size: 12px; font-weight: 600; cursor: pointer; text-align: right; margin-top: -6px; transition: color 0.2s; background: none; border: none; padding: 0; display: block; width: 100%; }
+.forgot-password-link:hover { text-decoration: underline; color: #0284c7; }
+.terms-checkbox-label { display: flex !important; flex-direction: row !important; align-items: flex-start !important; gap: 10px !important; font-size: 11.5px !important; color: #475569 !important; text-transform: none !important; letter-spacing: normal !important; cursor: pointer; margin-top: 4px; }
+.terms-checkbox-label input { margin-top: 3px; width: 16px !important; height: 16px !important; flex-shrink: 0; }
+.terms-link { color: #0ea5e9; text-decoration: underline; cursor: pointer; font-weight: 700; }
+.pwa-install-btn { display: flex; align-items: center; gap: 8px; margin: 12px 14px; padding: 10px 14px; background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%); color: #fff; border: 0; border-radius: 9px; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35); transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+.pwa-install-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(14, 165, 233, 0.5); }
+.user-avatar-img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid #38bdf8; }
+.ocr-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 99px; background: #e0f2fe; color: #0284c7; font-size: 11.5px; font-weight: 700; margin-bottom: 12px; border: 1px solid #bae6fd; animation: pulse 2s infinite; }
+.legal-modal { width: min(680px, 92vw) !important; max-height: 85vh; overflow-y: auto; text-align: left !important; padding: 36px 32px !important; }
+.legal-modal h2 { font-size: 22px; color: #0f172a; margin-bottom: 8px; }
+.legal-modal h3 { font-size: 14px; color: #0f172a; margin: 20px 0 6px; font-weight: 800; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px; }
+.legal-modal p, .legal-modal li { font-size: 12.5px; color: #475569; line-height: 1.65; }
+.legal-modal ul { padding-left: 20px; margin: 8px 0; }
+.whatsapp-modal { width: min(440px, 92vw) !important; text-align: center !important; }
+.whatsapp-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; background: #25d366; color: white !important; border: none; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; text-decoration: none; box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3); transition: all 0.2s; margin-top: 15px; }
+.whatsapp-btn:hover { background: #22c35e; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37, 211, 102, 0.45); }
+.success-banner { padding: 12px; border-radius: 8px; background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; font-size: 12px; font-weight: 600; text-align: center; margin-top: 10px; }
