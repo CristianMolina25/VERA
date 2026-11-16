@@ -23,6 +23,7 @@ function App() {
   const [support, setSupport] = useState(false)
   const [showTerms, setShowTerms] = useState(false)
   const [showWhatsApp, setShowWhatsApp] = useState(false)
+  const [showUserMenu, setShowUserMenu] = useState(false)
   const [loading, setLoading] = useState(false)
   const [ocrStatus, setOcrStatus] = useState('')
   const [error, setError] = useState('')
@@ -36,6 +37,12 @@ function App() {
     }
     window.addEventListener('beforeinstallprompt', installHandler)
     return () => window.removeEventListener('beforeinstallprompt', installHandler)
+  }, [])
+
+  useEffect(() => {
+    // Safety fallback: if onAuthStateChanged takes more than 2.5s, unblock view
+    const timer = setTimeout(() => setAuthReady(true), 2500)
+    return () => clearTimeout(timer)
   }, [])
 
   useEffect(() => {
@@ -225,7 +232,15 @@ function App() {
   }
 
   // --- Auth / Landing routing ---
-  if (!authReady) return <div className="auth-loading">Cargando VERA...</div>
+  if (!authReady) {
+    return (
+      <div className="auth-loading">
+        <img src={logoVera} alt="VERA" style={{ width: '56px', height: '56px', objectFit: 'contain' }} />
+        <div className="auth-spinner" />
+        <p style={{ color: '#94a3b8', fontSize: '13px', fontWeight: 600 }}>Iniciando VERA...</p>
+      </div>
+    )
+  }
   if (!isAuthenticated && page === 'landing') return <LandingPage onLogin={() => navigateTo('login')} onRegister={() => navigateTo('register')} onShowTerms={() => setShowTerms(true)} />
   if (!isAuthenticated && page === 'login') return <AuthPage mode="login" onBack={() => navigateTo('landing')} onSwitch={() => navigateTo('register')} onShowTerms={() => setShowTerms(true)} onComplete={() => { setIsAuthenticated(true); navigateTo('analizar') }} />
   if (!isAuthenticated && page === 'register') return <AuthPage mode="register" onBack={() => navigateTo('landing')} onSwitch={() => navigateTo('login')} onShowTerms={() => setShowTerms(true)} onComplete={() => { setIsAuthenticated(true); navigateTo('analizar') }} />
@@ -273,11 +288,16 @@ function App() {
 
       <main className="main-content">
         <header className="topbar">
-          <div className="breadcrumb">VERA <span>/</span> {page === 'analizar' ? 'Nuevo análisis' : page === 'historial' ? 'Historial' : 'Aprende a protegerte'}</div>
+          <div className="topbar-brand-mobile" onClick={() => navigateTo('analizar')}>
+            <img src={logoVera} alt="VERA" className="brand-logo-mob" />
+            <span className="brand-title-mob">VERA</span>
+          </div>
+          <div className="breadcrumb desktop-only">VERA <span>/</span> {page === 'analizar' ? 'Nuevo análisis' : page === 'historial' ? 'Historial' : 'Aprende a protegerte'}</div>
           <div className="status">
-            <i /> Servicio activo <span className="bell">🔔</span>
-            {/* Avatar compacto en móvil */}
-            <div className="mobile-user-pill" onClick={handleSignOut} title="Cerrar sesión">
+            <span className="status-indicator"><i /> <span className="status-label">Servicio activo</span></span>
+            <span className="bell desktop-only" onClick={() => setSupport(true)} title="Centro de ayuda">🔔</span>
+            {/* Avatar móvil abre menú de cuenta */}
+            <div className="mobile-user-pill" onClick={() => setShowUserMenu(true)} title="Mi cuenta">
               {currentUser?.photoURL
                 ? <img src={currentUser.photoURL} alt="Avatar" className="user-avatar-img" />
                 : <div className="avatar">{currentUser?.displayName?.[0] || currentUser?.email?.[0]?.toUpperCase() || 'U'}</div>
@@ -294,21 +314,75 @@ function App() {
       {/* ── Barra de navegación inferior (solo móvil ≤640px) ── */}
       <nav className="bottom-nav" aria-label="Navegación principal">
         <button className={`bottom-nav-item ${page === 'analizar' ? 'active' : ''}`} onClick={() => navigateTo('analizar')}>
-          <span className="bn-icon">⌁</span>Analizar
+          <span className="bn-icon">⌁</span>
+          <span>Analizar</span>
         </button>
         <button className={`bottom-nav-item ${page === 'historial' ? 'active' : ''}`} onClick={() => navigateTo('historial')}>
-          <span className="bn-icon">◷</span>Historial
+          <span className="bn-icon">
+            ◷
+            {history.length > 0 && <span className="bn-badge">{history.length}</span>}
+          </span>
+          <span>Historial</span>
         </button>
         <button className={`bottom-nav-item ${page === 'guia' ? 'active' : ''}`} onClick={() => navigateTo('guia')}>
-          <span className="bn-icon">✦</span>Guía
+          <span className="bn-icon">✦</span>
+          <span>Guía</span>
         </button>
         <button className="bottom-nav-item" onClick={() => setShowWhatsApp(true)}>
-          <span className="bn-icon">💬</span>WhatsApp
+          <span className="bn-icon" style={{ color: '#25d366' }}>💬</span>
+          <span>WhatsApp</span>
         </button>
-        <button className="bottom-nav-item" onClick={() => setSupport(true)}>
-          <span className="bn-icon">?</span>Ayuda
+        <button className={`bottom-nav-item ${showUserMenu ? 'active' : ''}`} onClick={() => setShowUserMenu(true)}>
+          <span className="bn-icon">👤</span>
+          <span>Cuenta</span>
         </button>
       </nav>
+
+      {/* Mobile User Profile & Menu Modal */}
+      {showUserMenu && (
+        <div className="modal-backdrop" onClick={() => setShowUserMenu(false)}>
+          <div className="support-modal user-menu-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="close-modal" onClick={() => setShowUserMenu(false)}>×</button>
+            <div className="user-menu-header">
+              {currentUser?.photoURL ? (
+                <img src={currentUser.photoURL} alt="Avatar" className="user-avatar-img" style={{ width: '44px', height: '44px' }} />
+              ) : (
+                <div className="avatar" style={{ width: '44px', height: '44px', fontSize: '16px' }}>
+                  {currentUser?.displayName?.[0] || currentUser?.email?.[0]?.toUpperCase() || 'U'}
+                </div>
+              )}
+              <div style={{ textAlign: 'left' }}>
+                <strong style={{ fontSize: '15px', color: '#0f172a', display: 'block' }}>
+                  {currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Mi Cuenta'}
+                </strong>
+                <small style={{ color: '#64748b', fontSize: '12px', display: 'block' }}>
+                  {currentUser?.email || 'Usuario protegido'}
+                </small>
+              </div>
+            </div>
+
+            <div className="user-menu-list">
+              {deferredPrompt && (
+                <button className="user-menu-item highlight" onClick={() => { setShowUserMenu(false); handleInstallApp() }}>
+                  <span>📲</span> Instalar App en Celular
+                </button>
+              )}
+              <a href="/poster.html" target="_blank" rel="noreferrer" className="user-menu-item" onClick={() => setShowUserMenu(false)}>
+                <span>📑</span> Ver Poster Expo (EN)
+              </a>
+              <button className="user-menu-item" onClick={() => { setShowUserMenu(false); setShowTerms(true) }}>
+                <span>🔒</span> Política de Datos (Ley 1581)
+              </button>
+              <button className="user-menu-item" onClick={() => { setShowUserMenu(false); setSupport(true) }}>
+                <span>?</span> Centro de Ayuda
+              </button>
+              <button className="user-menu-item danger" onClick={() => { setShowUserMenu(false); handleSignOut() }}>
+                <span>✕</span> Cerrar Sesión
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Support Modal */}
       {support && (
